@@ -386,6 +386,7 @@ age_plot <- ggplot(
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
+#| fig-cap: ""
 nitrogen_plot
 ```
 :::
@@ -393,6 +394,7 @@ nitrogen_plot
 ::: {.column width="50%"}
 ```{r}
 #| echo: false
+#| fig-cap: ""
 age_plot
 ```
 :::
