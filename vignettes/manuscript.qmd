@@ -329,10 +329,6 @@ analysis_coverage |>
 
 ```{r}
 #| label: fig-yield-management
-#| fig-cap: "Yield responses to nitrogen fertilization and stand age for Miscanthus and Panicum."
-#| fig-subcap:
-#|   - "Nitrogen fertilization"
-#|   - "Stand age"
 #| layout-ncol: 2
 #| fig-width: 10
 #| fig-height: 4.5
@@ -384,9 +380,27 @@ age_plot <- ggplot(
     plot.tag = element_text(face = "bold")
   )
 
+```
+
+::: {.columns}
+::: {.column width="50%"}
+```{r}
+#| echo: false
 nitrogen_plot
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+#| echo: false
 age_plot
 ```
+:::
+:::
+
+**Figure 4.** Yield responses to nitrogen fertilization and stand age for
+*Miscanthus* and *Panicum*. Panels (a) and (d) match the corresponding panels
+in the manuscript figure.
 
 The displayed axes match the published figure for visual comparison. Axis
 limits use `coord_cartesian()`, so valid observations outside the displayed
