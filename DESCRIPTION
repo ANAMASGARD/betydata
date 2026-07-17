@@ -17,6 +17,7 @@ BugReports: https://github.com/PecanProject/betydata/issues
 Depends:
     R (>= 4.1.0)
 Suggests:
+    DT,
     dplyr (>= 1.1.0),
     ggplot2,
     jsonlite,
