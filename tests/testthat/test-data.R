@@ -53,8 +53,15 @@ test_that("variables table loads correctly", {
   data("variables", package = "betydata")
 
   expect_s3_class(variables, "data.frame")
-  required_cols <- c("id", "name", "units")
+  required_cols <- c("id", "name", "units", "min", "max")
   expect_true(all(required_cols %in% names(variables)))
+})
+
+test_that("variables table has no infinite bound placeholders", {
+  data("variables", package = "betydata")
+
+  expect_false(any(variables$min %in% c("-Infinity", "Infinity")))
+  expect_false(any(variables$max %in% c("-Infinity", "Infinity")))
 })
 
 test_that("pfts table loads correctly", {
