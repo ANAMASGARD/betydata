@@ -60,8 +60,7 @@ test_that("variables table loads correctly", {
 test_that("variables table has no infinite bound placeholders", {
   data("variables", package = "betydata")
 
-  expect_false(any(variables$min %in% c("-Infinity", "Infinity")))
-  expect_false(any(variables$max %in% c("-Infinity", "Infinity")))
+  expect_all_false(is.infinite(c(variables$min, variables$max)))
 })
 
 test_that("pfts table loads correctly", {
