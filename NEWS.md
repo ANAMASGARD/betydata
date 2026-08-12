@@ -1,5 +1,7 @@
 # betydata (development version)
 
+* Replaced `Infinity` and `-Infinity` variable-bound placeholders with `NA`.
+
 # betydata 0.1.0
 
 ## Initial Release
