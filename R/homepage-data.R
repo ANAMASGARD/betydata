@@ -4,8 +4,23 @@ homepage_non_blank <- function(x) {
   !is.na(x) & (!is.character(x) | nzchar(trimws(x)))
 }
 
+homepage_labels <- function(x) {
+  values <- trimws(as.character(x))
+  sort(unique(values[homepage_non_blank(values)]))
+}
+
+homepage_collapse_labels <- function(x) {
+  values <- homepage_labels(x)
+
+  if (length(values) == 0L) {
+    return(NA_character_)
+  }
+
+  paste(values, collapse = "; ")
+}
+
 homepage_metrics <- function(data) {
-  data.frame(
+  tibble::tibble(
     metric = c(
       "Observations",
       "Measured variables",
@@ -26,48 +41,61 @@ homepage_metrics <- function(data) {
       "Distinct species linked to observation records",
       "Distinct research sites linked to observation records",
       "Distinct cited sources linked to observation records"
-    ),
-    stringsAsFactors = FALSE
+    )
   )
 }
 
 homepage_top_traits <- function(data, n = 10L) {
-  traits <- data$trait[homepage_non_blank(data$trait)]
-  counts <- as.data.frame(table(traits), stringsAsFactors = FALSE)
-  names(counts) <- c("trait", "observations")
-  counts$observations <- as.integer(counts$observations)
-  counts <- counts[order(-counts$observations, counts$trait), , drop = FALSE]
-  utils::head(counts, n)
+  data <- dplyr::filter(data, homepage_non_blank(data[["trait"]]))
+
+  summary <- dplyr::summarise(
+    data,
+    description = homepage_collapse_labels(
+      dplyr::pick("trait_description")[[1L]]
+    ),
+    observations = dplyr::n(),
+    .by = "trait"
+  )
+
+  summary <- dplyr::arrange(
+    summary,
+    dplyr::desc(summary[["observations"]]),
+    summary[["trait"]]
+  )
+
+  dplyr::slice_head(summary, n = n)
 }
 
 homepage_top_species <- function(data, n = 10L) {
-  valid_species <- !is.na(data$species_id) & homepage_non_blank(data$scientificname)
-  data <- data[valid_species, c("species_id", "scientificname"), drop = FALSE]
-  data$scientificname <- trimws(data$scientificname)
-  data$scientificname[!homepage_non_blank(data$scientificname)] <- NA_character_
+  data <- dplyr::filter(data, !is.na(data[["species_id"]]))
 
-  species_ids <- unique(data$species_id)
-  summary <- lapply(species_ids, function(species_id) {
-    rows <- data[data$species_id == species_id, , drop = FALSE]
-    names <- unique(rows$scientificname[!is.na(rows$scientificname)])
+  summary <- dplyr::summarise(
+    data,
+    scientific_name = {
+      names <- homepage_labels(dplyr::pick("scientificname")[[1L]])
 
-    if (length(names) > 1L) {
-      stop(
-        "Each species_id must have at most one non-blank scientificname.",
-        call. = FALSE
-      )
-    }
+      if (length(names) > 1L) {
+        stop(
+          "Each species_id must have at most one non-blank scientific name.",
+          call. = FALSE
+        )
+      }
 
-    data.frame(
-      species_id = species_id,
-      species = if (length(names) == 1L) names else NA_character_,
-      observations = nrow(rows),
-      stringsAsFactors = FALSE
-    )
-  })
+      if (length(names) == 0L) NA_character_ else names
+    },
+    common_name = homepage_collapse_labels(
+      dplyr::pick("commonname")[[1L]]
+    ),
+    observations = dplyr::n(),
+    .by = "species_id"
+  )
 
-  summary <- do.call(rbind, summary)
-  summary <- summary[order(-summary$observations, summary$species, summary$species_id), , drop = FALSE]
-  rownames(summary) <- NULL
-  utils::head(summary, n)
+  summary <- dplyr::arrange(
+    summary,
+    dplyr::desc(summary[["observations"]]),
+    summary[["scientific_name"]],
+    summary[["species_id"]]
+  )
+
+  dplyr::slice_head(summary, n = n)
 }
